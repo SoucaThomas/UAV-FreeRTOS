@@ -9,9 +9,7 @@ class Task {
  private:
   TaskHandle_t handle;
 
-  static void trampoline(void* param) {
-    static_cast<Derived*>(param)->run();
-  }
+  static void trampoline(void* param) { static_cast<Derived*>(param)->run(); }
 
  public:
   Task() : handle(nullptr) {}
@@ -24,9 +22,7 @@ class Task {
     xTaskCreate(trampoline, name, stackSize, copy, priority, &copy->handle);
   }
 
-  void delay(uint32_t ms) {
-    vTaskDelay(pdMS_TO_TICKS(ms));
-  }
+  void delay(uint32_t ms) { vTaskDelay(pdMS_TO_TICKS(ms)); }
 };
 
 #endif

@@ -8,8 +8,7 @@
 #include "protocol.h"
 
 template <uint8_t N>
-Packet buildPacket(uint8_t seq, PacketTypes packetType,
-                   const uint8_t (&payload)[N]) {
+Packet buildPacket(uint8_t seq, PacketTypes packetType, const uint8_t (&payload)[N]) {
   static_assert(N <= MAX_PAYLOAD_SIZE, "Payload exceeds max size");
   Packet packet;
 
