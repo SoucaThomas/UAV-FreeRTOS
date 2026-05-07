@@ -1,8 +1,8 @@
-#include "tasks/blink_task.hpp"
+#include "tasks/spi_test_task.hpp"
 
 int main() {
-  BlinkTask blink(GPIOC, 13);
-  blink.start("blink", 128, 1);
+  SpiTestTask spiTest;
+  spiTest.start("spi_test", 256, 1);
   vTaskStartScheduler();
   while (true) {
   }
