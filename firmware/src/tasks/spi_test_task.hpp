@@ -16,7 +16,7 @@ class SpiTestTask : public Task<SpiTestTask> {
   Led led;
 
  public:
-  SpiTestTask() : spi(SPI1, GPIOA, 4), led(GPIOC, 13) {};
+  SpiTestTask() : spi(SPI1, GPIOA, 4), led(GPIOC, 13){};
 
   void run() {
     while (true) {
