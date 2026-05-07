@@ -2,6 +2,7 @@
 #define SPI_TEST_TASK_HPP
 
 #include "drivers/spi.hpp"
+#include "drivers/uart.hpp"
 #include "led.hpp"
 #include "task.hpp"
 
@@ -14,24 +15,36 @@ class SpiTestTask : public Task<SpiTestTask> {
  private:
   Spi spi;
   Led led;
+  Uart uart;
 
  public:
-  SpiTestTask() : spi(SPI1, GPIOA, 4), led(GPIOC, 13){};
+  SpiTestTask() : spi(SPI1, GPIOA, 4), led(GPIOC, 13), uart(USART1, 115200) {};
 
   void run() {
+    uart.print("SPI loopback test\r\n");
+    uart.print("Connect PA7 (MOSI) to PA6 (MISO)\r\n\r\n");
+
     while (true) {
       uint8_t r1 = spi.transfer(0xA5);
       uint8_t r2 = spi.transfer(0x3C);
 
       if (r1 == 0xA5 && r2 == 0x3C) {
-        // Both loopbacks match — blink fast
+        uart.print("[PASS] TX: 0xA5 -> RX: 0x");
+        uart.printHex(r1);
+        uart.print("  TX: 0x3C -> RX: 0x");
+        uart.printHex(r2);
+        uart.print("\r\n");
         led.toggle();
-        delay(100);
       } else {
-        // Failed — stay solid (LED on)
+        uart.print("[FAIL] TX: 0xA5 -> RX: 0x");
+        uart.printHex(r1);
+        uart.print("  TX: 0x3C -> RX: 0x");
+        uart.printHex(r2);
+        uart.print("\r\n");
         led.on();
-        delay(1000);
       }
+
+      delay(500);
     }
   }
 };
