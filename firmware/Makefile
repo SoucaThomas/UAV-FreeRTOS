@@ -1,5 +1,4 @@
-TARGET  = bluepill
-PORT   ?= /dev/cu.usbserial-A50285BI
+TARGET  = blackpill
 
 # Toolchain
 CXX     = arm-none-eabi-g++
@@ -18,13 +17,13 @@ BUILD_DIR   = build
 EXT_DIR     = external
 CMSIS_DIR   = $(EXT_DIR)/cmsis
 RTOS_DIR    = $(EXT_DIR)/freertos
-RTOS_PORT   = $(RTOS_DIR)/portable/GCC/ARM_CM3
+RTOS_PORT   = $(RTOS_DIR)/portable/GCC/ARM_CM4F
 RTOS_HEAP   = $(RTOS_DIR)/portable/MemMang
 
 # Sources
 SRCS    = $(wildcard $(SRC_DIR)/*.cpp)
 STARTUP = $(STARTUP_DIR)/startup.s
-LINKER  = $(LINKER_DIR)/stm32f103c8.ld
+LINKER  = $(LINKER_DIR)/stm32f411ce.ld
 
 # FreeRTOS C sources
 RTOS_SRCS = $(RTOS_DIR)/tasks.c \
@@ -37,13 +36,14 @@ OBJS    = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 OBJS   += $(BUILD_DIR)/startup.o
 OBJS   += $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(RTOS_SRCS)))
 
-# Flags
-MCU     = -mcpu=cortex-m3 -mthumb
+# Flags — Cortex-M4 with hardware FPU
+MCU     = -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
 INCLUDES = -I$(INC_DIR) \
            -I$(CMSIS_DIR) \
            -I$(RTOS_DIR)/include \
-           -I$(RTOS_PORT)
+           -I$(RTOS_PORT) \
+           -I../shared
 
 CXXFLAGS = $(MCU) \
            -Os -g \
@@ -52,7 +52,7 @@ CXXFLAGS = $(MCU) \
            -fno-rtti \
            -ffunction-sections \
            -fdata-sections \
-           -DSTM32F103xB \
+           -DSTM32F411xE \
            $(INCLUDES)
 
 CFLAGS   = $(MCU) \
@@ -60,7 +60,7 @@ CFLAGS   = $(MCU) \
            -Wall -Wextra \
            -ffunction-sections \
            -fdata-sections \
-           -DSTM32F103xB \
+           -DSTM32F411xE \
            $(INCLUDES)
 
 LDFLAGS  = $(MCU) \
@@ -107,9 +107,13 @@ $(BUILD_DIR):
 	mkdir -p $@
 
 flash: $(BUILD_DIR)/$(TARGET).bin
-	stm32flash -w $< -v -g 0x08000000 $(PORT)
+	dfu-util -a 0 -s 0x08000000:leave -D $<
+
+flash-stlink: $(BUILD_DIR)/$(TARGET).elf
+	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg \
+		-c "program $< verify reset exit"
 
 clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all flash clean
+.PHONY: all flash flash-stlink clean

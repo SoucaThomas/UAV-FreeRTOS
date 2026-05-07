@@ -1,12 +1,12 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-// Cortex-M3 runs at 8MHz HSI by default (no PLL configured yet)
-#define configCPU_CLOCK_HZ 8000000UL
+// Cortex-M4 runs at 16MHz HSI by default (no PLL configured yet)
+#define configCPU_CLOCK_HZ 16000000UL
 #define configTICK_RATE_HZ 1000
 #define configMAX_PRIORITIES 5
 #define configMINIMAL_STACK_SIZE 128
-#define configTOTAL_HEAP_SIZE ((size_t)(2 * 1024))
+#define configTOTAL_HEAP_SIZE ((size_t)(32 * 1024))
 #define configMAX_TASK_NAME_LEN 16
 #define configUSE_PREEMPTION 1
 #define configUSE_IDLE_HOOK 0
@@ -25,6 +25,7 @@
 #define configUSE_COUNTING_SEMAPHORES 0
 #define configUSE_QUEUE_SETS 0
 #define configUSE_TASK_NOTIFICATIONS 1
+#define configUSE_QUEUE_SETS 0
 
 // Disable unused features to save flash
 #define configUSE_CO_ROUTINES 0
@@ -32,7 +33,7 @@
 #define configGENERATE_RUN_TIME_STATS 0
 #define configCHECK_FOR_STACK_OVERFLOW 0
 
-// Cortex-M3 interrupt priorities
+// Cortex-M4 interrupt priorities
 #define configPRIO_BITS 4
 #define configLIBRARY_LOWEST_INTERRUPT_PRIORITY 15
 #define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 5
@@ -41,7 +42,6 @@
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY \
   (configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS))
 
-// Map FreeRTOS handlers to our vector table names
 // Include optional API functions
 #define INCLUDE_vTaskDelay 1
 #define INCLUDE_vTaskPrioritySet 0
