@@ -27,7 +27,7 @@ class Spi {
     gpio->MODER &= ~(0x3 << (6 * 2));   // clear pin
     gpio->MODER |= (0x2 << (6 * 2));    // set to alternate function
     gpio->AFR[0] &= ~(0xF << (6 * 4));  // clear pin
-    gpio->AFR[0] |= (0x5 << (6 * 4));   // set pin 6 to AF6
+    gpio->AFR[0] |= (0x5 << (6 * 4));   // set pin 6 to AF5
 
     // Pin 7
     gpio->MODER &= ~(0x3 << (7 * 2));   // clear pin
@@ -53,19 +53,13 @@ class Spi {
   };
 
   uint8_t transfer(uint8_t byte) {
-    // Wait until TX buffer is empty
     while (!(spi->SR & SPI_SR_TXE));
-
-    // Write byte to register
     spi->DR = byte;
-
-    // Wait until RX buffer has data
     while (!(spi->SR & SPI_SR_RXNE));
-
-    // Read and return the received byte
     return spi->DR;
   };
 
+  bool isBusy() { return spi->SR & SPI_SR_BSY; }
   void csLow() { gpio->BSRR = (1 << (cs_pin + 16)); }  // reset = pull low
   void csHigh() { gpio->BSRR = (1 << cs_pin); }        // set = pull high
 };

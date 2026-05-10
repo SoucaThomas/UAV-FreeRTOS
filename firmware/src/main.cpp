@@ -1,8 +1,8 @@
-#include "tasks/spi_test_task.hpp"
+#include "tasks/nrf24l01_test_task.hpp"
 
 int main() {
-  SpiTestTask spiTest;
-  spiTest.start("spi_test", 256, 1);
+  Nrf24l01_test_task nrfTest;
+  nrfTest.start("nrf_test", 512, 1);
   vTaskStartScheduler();
   while (true) {
   }

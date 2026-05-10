@@ -7,7 +7,7 @@
 #include "task.hpp"
 
 /*
-    Connect A6 to A6 -> loopback test
+    Connect A6 to A7 -> loopback test
     If it works the onboard led should blink fast
     If it doesn't work the onboard led should stay solid
 */
