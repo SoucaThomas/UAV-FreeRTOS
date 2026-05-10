@@ -1,8 +1,8 @@
-#include "tasks/nrf24l01_test_task.hpp"
+#include "tasks/mpu6050_test_task.hpp"
 
 int main() {
-  Nrf24l01_test_task nrfTest;
-  nrfTest.start("nrf_test", 512, 1);
+  Mpu6050TestTask mpuTest;
+  mpuTest.start("mpu_test", 512, 1);
   vTaskStartScheduler();
   while (true) {
   }

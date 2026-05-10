@@ -50,6 +50,26 @@ class Uart {
     write(hex[byte >> 4]);    // high nibble
     write(hex[byte & 0x0F]);  // low nibble
   }
+
+  void printInt(int16_t val) {
+    if (val < 0) {
+      write('-');
+      val = -val;
+    }
+    if (val == 0) {
+      write('0');
+      return;
+    }
+    char buf[6];
+    int i = 0;
+    while (val > 0) {
+      buf[i++] = '0' + (val % 10);
+      val /= 10;
+    }
+    for (int j = i - 1; j >= 0; j--) {
+      write(buf[j]);
+    }
+  }
 };
 
 #endif
