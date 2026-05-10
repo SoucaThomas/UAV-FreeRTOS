@@ -1,196 +1,147 @@
 # UAV-FreeRTOS
 
-A custom flight controller and ground station for a 1.2m wingspan MQ-9 Reaper RC plane, built from scratch on STM32 + FreeRTOS.
+DIY flight controller for an MQ-9 Reaper RC plane (1.2m wingspan). Everything from scratch - bare metal STM32, FreeRTOS, custom radio protocol, and a ground station app. No Betaflight, no ArduPilot, just registers and pain.
 
-## Overview
+## What is this
 
-This project implements a complete UAV system — bare-metal firmware, communication protocol, sensor fusion, and a ground station PC app — with no off-the-shelf flight controller software.
+I'm building a fixed-wing RC plane and writing all the flight controller software myself. The plane runs on a STM32F411 (Black Pill board) with FreeRTOS, talks to the ground over NRF24L01 radio, and reads an MPU6050 gyro for stabilization.
 
-**Hardware:**
-- STM32F411CE (Black Pill) — ARM Cortex-M4 with hardware FPU
-- MPU6050/6500 IMU — accelerometer + gyroscope
-- NRF24L01+PA+LNA — 2.4GHz radio link
-- Hobbywing Skywalker 60A ESC + brushless motor
-- Servos for control surfaces (aileron, elevator, rudder)
+The ground station is a React app that shows the plane on a map, displays telemetry, and takes PS5 controller input.
 
-## Project Structure
+**Current hardware:**
+- STM32F411CE Black Pill
+- MPU6500 (came labeled as MPU6050, works the same)
+- NRF24L01+PA+LNA (cheap AliExpress clone, channel register is stuck at 0 lol)
+- Hobbywing Skywalker 60A V2 ESC
+- Robbe Roxxy BL 3545-12 motor
+- 4S LiPo
 
-```
-UAV-FreeRTOS/
-├── firmware/               Aircraft MCU firmware (FreeRTOS)
-│   ├── src/
-│   │   ├── main.cpp        Entry point
-│   │   ├── core/           Flight state machine
-│   │   └── tasks/          FreeRTOS task implementations
-│   ├── include/            FreeRTOS config, task base class, LED driver
-│   ├── external/           FreeRTOS kernel + CMSIS headers
-│   ├── linker/             STM32 linker scripts
-│   └── startup/            Cortex-M4 startup assembly
-├── shared/                 Code shared between aircraft + ground station
-│   ├── drivers/            Hardware drivers (SPI, I2C, UART, NRF, MPU, PWM)
-│   ├── crc.h               CRC-16-CCITT
-│   ├── protocol.h          Packet type definitions
-│   └── packet.h            Packet serialization
-├── ground-station/
-│   ├── app/                PC ground station (React + TypeScript)
-│   └── mcu/                Ground station MCU firmware (planned)
-├── tests/                  Unit tests (Google Test)
-└── .github/workflows/      CI/CD (auto-test + auto-format)
-```
-
-## Firmware
-
-### Drivers
-
-All drivers are header-only C++ classes in `shared/drivers/`:
-
-| Driver | Interface | Pins | Description |
-|--------|-----------|------|-------------|
-| `spi.hpp` | SPI1 | PA5/PA6/PA7/PA4 | Master, configurable prescaler |
-| `i2c.hpp` | I2C1 | PB6/PB7 | Master, 100kHz |
-| `uart.hpp` | USART1 | PA9/PA10 | Debug serial, 115200 baud |
-| `nrf24l01.hpp` | SPI | PA3 (CE), PA4 (CS) | 2.4GHz radio, 32-byte packets |
-| `mpu6050.hpp` | I2C | 0x68 | 6-axis IMU, calibration, float output |
-| `pwm.hpp` | TIM2/TIM3 | PA0-3, PB0-5 | 50Hz servo/ESC PWM |
-
-### Sensor Fusion
-
-Complementary filter at 100Hz combining gyroscope (short-term accuracy) and accelerometer (long-term stability) for pitch and roll estimation:
+## Project layout
 
 ```
-pitch = 0.98 * (pitch + gyro * dt) + 0.02 * accel_angle
+firmware/          STM32 firmware (FreeRTOS tasks, startup, linker scripts)
+shared/            Drivers and protocol code (used by both aircraft and ground station)
+shared/drivers/    SPI, I2C, UART, NRF24L01, MPU6050, PWM drivers
+ground-station/    PC app (React + TypeScript + MapLibre)
+tests/             Unit tests (Google Test)
 ```
 
-### State Machine
+## Drivers
 
-9-state flight controller state machine with safety guards:
+Wrote all the peripheral drivers from scratch, register level. They're all in `shared/drivers/` as header-only C++ classes.
 
-```
-BOOT -> CALIBRATING -> DISARMED -> ARMED -> MANUAL <-> STABILIZE
-                                     |         |           |
-                                     |    FAILSAFE_SHORT --+
-                                     |         |
-                                     |    FAILSAFE_LONG
-                                     |
-                                  EMERGENCY (from any state)
-```
+- **SPI** - talks to the NRF radio (PA5/PA6/PA7, software CS on PA4)
+- **I2C** - talks to the gyro (PB6/PB7, 100kHz)
+- **UART** - debug output (PA9/PA10, 115200 baud)
+- **NRF24L01** - radio driver with register read/write, TX/RX, init sequence
+- **MPU6050** - gyro + accel with calibration, outputs in g and deg/s
+- **PWM** - timer-based 50Hz for servos and ESC (TIM2/TIM3)
 
-**Arming requires:** gyro calibrated, radio link active, throttle at idle, battery above minimum voltage.
+## Sensor fusion
 
-**Failsafe:** Two-stage radio loss handling — wings level + cruise throttle after 100ms, motor cut + glide after 10s.
-
-### Communication Protocol
-
-Fixed 32-byte packets over NRF24L01:
+Complementary filter running at 100Hz. Blends gyro (fast, drifts) with accelerometer (slow, noisy) for pitch and roll:
 
 ```
-[SEQ 1B] [TYPE 1B] [LEN 1B] [PAYLOAD 0-27B] [CRC16 2B]
+pitch = 0.98 * (pitch + gyro * dt) + 0.02 * atan2(ax, az)
 ```
 
-Packet types: `HEARTBEAT`, `ACK`, `NACK`, `CMD`, `TELEMETRY`
+Works surprisingly well - steady to ~0.05 degrees when sitting still, responds instantly to tilting.
 
-CRC-16-CCITT (polynomial 0x1021) for corruption detection.
+## State machine
 
-## Ground Station
+The flight controller has 9 states:
 
-React + TypeScript desktop app for flight monitoring and control.
+```
+BOOT -> CALIBRATING -> DISARMED -> ARMED -> MANUAL / STABILIZE
+```
 
-**Tech stack:** Vite, Tailwind CSS v4, shadcn/ui, MapLibre GL (mapcn), Tauri
+Plus `FAILSAFE_SHORT`, `FAILSAFE_LONG`, and `EMERGENCY` for when things go wrong. Can't arm without the gyro calibrated, radio linked, throttle at zero, and battery voltage OK. Auto-disarms after 60s if you arm but never take off.
 
-**Features:**
-- PS5 controller input via Gamepad API
-- Real-time map with aircraft position and flight trail
-- OpenAIP airspace overlay with zone classification
-- Telemetry display (attitude, battery, distance, radio link)
-- Attitude indicator and stick position visualization
-- Flight simulation mode (controller-driven)
-- Multiple map styles (dark, light, satellite, OSM)
-- Configurable airspace overlay opacity
+The whole thing is unit tested with 38 tests covering every transition and edge case.
 
-### Setup
+## Radio protocol
 
+32-byte fixed packets over NRF24L01:
+
+```
+[SEQ 1B][TYPE 1B][LEN 1B][PAYLOAD 0-27B][CRC16 2B]
+```
+
+Types are HEARTBEAT, ACK, NACK, CMD, TELEMETRY. CRC-16-CCITT catches corrupted packets. The 32 byte size matches the NRF's native payload size so there's no fragmentation.
+
+## Ground station
+
+React + TypeScript app with shadcn/ui. Uses a PS5 controller for input (via browser Gamepad API).
+
+What it does:
+- Shows the plane on a dark map (MapLibre + Carto tiles)
+- OpenAIP airspace overlay so you can see if you're about to fly somewhere illegal
+- Telemetry panel with battery, distance, link status
+- Attitude indicator showing pitch/roll
+- Stick position display
+- Simulation mode where you can fly a virtual plane around with the controller
+- Multiple map styles you can switch between
+- Toggleable panels for everything
+
+To run it:
 ```bash
 cd ground-station/app
-cp .env.example .env        # Add your OpenAIP API key
+cp .env.example .env    # put your OpenAIP key in here
 bun install
-bun run dev                 # http://localhost:5173
+bun run dev
 ```
 
-Get a free API key at [openaip.net](https://www.openaip.net/) for airspace data.
+You need a free API key from [openaip.net](https://www.openaip.net/) for the airspace overlay.
 
-## Building
+## Building the firmware
 
-### Prerequisites
-
-- `arm-none-eabi-gcc` — ARM cross-compiler
-- `dfu-util` — USB DFU flashing tool
-- `bun` — JavaScript runtime (for ground station)
-- Google Test — for unit tests
-
-### Firmware
+You need `arm-none-eabi-gcc` and `dfu-util`.
 
 ```bash
-make firmware               # Build
-make flash                  # Flash via DFU
-make flash-stlink           # Flash via ST-Link
+make firmware     # build
+make flash        # flash over USB (DFU mode)
 ```
 
-### Tests
+## Running tests
 
 ```bash
-make tests                  # Build and run all tests
+make tests
 ```
 
-53 unit tests covering CRC, packet serialization, and state machine transitions.
+53 tests - CRC, packet serialization, protocol, and state machine.
 
-### Ground Station
+## Pin map
 
-```bash
-cd ground-station/app
-bun install
-bun run dev                 # Development server
-bun run build               # Production build
-```
+| Pin | What |
+|-----|------|
+| PA0 | ESC (TIM2 CH1) |
+| PA1 | Elevator servo (TIM2 CH2) |
+| PA3 | NRF CE |
+| PA4 | NRF CSN |
+| PA5/6/7 | SPI (NRF) |
+| PA9/10 | UART (debug) |
+| PB0 | Rudder servo (TIM3 CH3) |
+| PB4/5 | Aileron servos (TIM3 CH1/2) |
+| PB6/7 | I2C (gyro) |
+| PC13 | LED |
 
-## Pin Map
+## What's left to do
 
-| Pin | Function | Connected To |
-|-----|----------|-------------|
-| PA0 | TIM2 CH1 | ESC signal |
-| PA1 | TIM2 CH2 | Servo (elevator) |
-| PA3 | GPIO | NRF24L01 CE |
-| PA4 | GPIO | NRF24L01 CSN |
-| PA5 | SPI1 SCK | NRF24L01 SCK |
-| PA6 | SPI1 MISO | NRF24L01 MISO |
-| PA7 | SPI1 MOSI | NRF24L01 MOSI |
-| PA9 | USART1 TX | USB-Serial adapter |
-| PA10 | USART1 RX | USB-Serial adapter |
-| PB0 | TIM3 CH3 | Servo (rudder) |
-| PB4 | TIM3 CH1 | Servo (aileron L) |
-| PB5 | TIM3 CH2 | Servo (aileron R) |
-| PB6 | I2C1 SCL | MPU6050 SCL |
-| PB7 | I2C1 SDA | MPU6050 SDA |
-| PC13 | GPIO | Onboard LED |
+- [x] Protocol + drivers
+- [x] NRF24L01 radio
+- [x] MPU6050 gyro + sensor fusion
+- [x] PWM for servos/ESC
+- [x] State machine
+- [x] Ground station app
+- [ ] PID controller
+- [ ] Servo mixer
+- [ ] Radio link between two boards
+- [ ] Ground station MCU (UART-radio bridge)
+- [ ] Connect the app to actual hardware over serial
+- [ ] GPS
+- [ ] Battery monitoring
+- [ ] Actually fly the thing
 
-## Roadmap
+## EU stuff
 
-- [x] Communication protocol (CRC, packets, serialization)
-- [x] SPI, I2C, UART drivers
-- [x] NRF24L01 radio driver
-- [x] MPU6050/6500 IMU driver + sensor fusion
-- [x] PWM driver (servos + ESC)
-- [x] Flight state machine
-- [x] Ground station app with map + airspace
-- [ ] PID controller (pitch, roll, yaw stabilization)
-- [ ] Servo mixer (PID output to control surfaces)
-- [ ] Radio TX/RX tasks (NRF24L01 packet exchange)
-- [ ] Ground station MCU firmware (UART-radio bridge)
-- [ ] Serial communication (ground station app to MCU)
-- [ ] GPS integration + waypoint navigation
-- [ ] Battery voltage monitoring (ADC)
-- [ ] Frequency hopping
-- [ ] Data logging
-
-## License
-
-This project is for educational and personal use.
+This falls under EASA Open Category A3 in Romania. Need to register with AACR, do the free online theory test, and fly 150m from buildings/people. The NRF24L01 at 0dBm is well under the EU 100mW limit for 2.4GHz ISM band.
