@@ -4,3 +4,9 @@ compile_commands.json
 .vscode/
 tests/run_tests
 docs/*
+
+# Ground station app
+ground-station/app/node_modules/
+ground-station/app/dist/
+ground-station/app/.env
+ground-station/app/bun.lock
