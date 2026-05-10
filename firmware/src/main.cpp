@@ -1,8 +1,8 @@
-#include "tasks/sensor_task.hpp"
+#include "tasks/pwm_test_task.hpp"
 
 int main() {
-  SensorTask sensorTask;
-  sensorTask.start("sensor", 512, 1);
+  PwmTestTask pwmTest;
+  pwmTest.start("pwm_test", 512, 1);
   vTaskStartScheduler();
   while (true) {
   }
