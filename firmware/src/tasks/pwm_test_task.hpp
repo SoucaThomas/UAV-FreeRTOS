@@ -13,7 +13,7 @@ class PwmTestTask : public Task<PwmTestTask> {
   Uart uart;
 
  public:
-  PwmTestTask() : pwm(TIM2, 0x03), led(GPIOC, 13), uart(USART1, 115200) {};
+  PwmTestTask() : pwm(TIM2, 0x03), led(GPIOC, 13), uart(USART1, 115200){};
 
   void run() {
     uart.print("PWM simple test\r\n");
@@ -29,8 +29,8 @@ class PwmTestTask : public Task<PwmTestTask> {
     GPIOA->AFR[0] |= (0x1 << 0);
 
     // TIM2: 50Hz, CH1 at 1100us
-    TIM2->PSC = 15;        // 16MHz / 16 = 1MHz
-    TIM2->ARR = 19999;     // 20ms period
+    TIM2->PSC = 15;     // 16MHz / 16 = 1MHz
+    TIM2->ARR = 19999;  // 20ms period
     TIM2->CCMR1 = (0x6 << 4) | TIM_CCMR1_OC1PE;
     TIM2->CCER = TIM_CCER_CC1E;
     TIM2->CCR1 = 2000;
