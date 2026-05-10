@@ -21,8 +21,7 @@ class SensorTask : public Task<SensorTask> {
 
  public:
   SensorTask()
-      : i2c(I2C1), mpu(&i2c), led(GPIOC, 13), uart(USART1, 115200),
-        pitch(0.0f), roll(0.0f) {};
+      : i2c(I2C1), mpu(&i2c), led(GPIOC, 13), uart(USART1, 115200), pitch(0.0f), roll(0.0f){};
 
   void run() {
     mpu.setI2c(&i2c);
