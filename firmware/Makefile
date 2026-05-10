@@ -68,14 +68,15 @@ LDFLAGS  = $(MCU) \
            -Wl,--gc-sections \
            -Wl,-Map=$(BUILD_DIR)/$(TARGET).map \
            --specs=nano.specs \
-           -nostdlib \
-           -lgcc
+           -nostdlib
+
+LDLIBS   = -lm -lgcc
 
 # Build rules
 all: $(BUILD_DIR)/$(TARGET).bin
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJS)
-	$(CXX) $(LDFLAGS) $^ -o $@
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 	$(SIZE) $@
 
 $(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf

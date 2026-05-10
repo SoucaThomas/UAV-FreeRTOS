@@ -51,7 +51,7 @@ class Uart {
     write(hex[byte & 0x0F]);  // low nibble
   }
 
-  void printInt(int16_t val) {
+  void printInt(int32_t val) {
     if (val < 0) {
       write('-');
       val = -val;
@@ -60,7 +60,7 @@ class Uart {
       write('0');
       return;
     }
-    char buf[6];
+    char buf[11];
     int i = 0;
     while (val > 0) {
       buf[i++] = '0' + (val % 10);
@@ -68,6 +68,21 @@ class Uart {
     }
     for (int j = i - 1; j >= 0; j--) {
       write(buf[j]);
+    }
+  }
+
+  void printFloat(float val, uint8_t decimals) {
+    if (val < 0.0f) {
+      write('-');
+      val = -val;
+    }
+    printInt((int32_t)val);
+    write('.');
+    float frac = val - (int32_t)val;
+    for (uint8_t i = 0; i < decimals; i++) {
+      frac *= 10.0f;
+      write('0' + (uint8_t)frac);
+      frac -= (uint8_t)frac;
     }
   }
 };

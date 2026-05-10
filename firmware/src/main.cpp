@@ -1,8 +1,8 @@
-#include "tasks/mpu6050_test_task.hpp"
+#include "tasks/sensor_task.hpp"
 
 int main() {
-  Mpu6050TestTask mpuTest;
-  mpuTest.start("mpu_test", 512, 1);
+  SensorTask sensorTask;
+  sensorTask.start("sensor", 512, 1);
   vTaskStartScheduler();
   while (true) {
   }
