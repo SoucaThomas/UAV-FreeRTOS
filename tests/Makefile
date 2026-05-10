@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -I../shared
+CXXFLAGS = -std=c++17 -Wall -Wextra -I../shared -I../firmware/src
 
 # Use brew paths on macOS, system paths on Linux
 UNAME := $(shell uname)
