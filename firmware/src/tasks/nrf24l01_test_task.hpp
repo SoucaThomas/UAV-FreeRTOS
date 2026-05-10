@@ -16,7 +16,7 @@ class Nrf24l01_test_task : public Task<Nrf24l01_test_task> {
 
  public:
   Nrf24l01_test_task()
-      : spi(SPI1, GPIOA, 4), nrf(&spi, GPIOA, 3), led(GPIOC, 13), uart(USART1, 115200) {};
+      : spi(SPI1, GPIOA, 4), nrf(&spi, GPIOA, 3), led(GPIOC, 13), uart(USART1, 115200){};
 
   void run() {
     // Fix SPI pointer after memcpy

@@ -18,7 +18,7 @@ class SpiTestTask : public Task<SpiTestTask> {
   Uart uart;
 
  public:
-  SpiTestTask() : spi(SPI1, GPIOA, 4), led(GPIOC, 13), uart(USART1, 115200) {};
+  SpiTestTask() : spi(SPI1, GPIOA, 4), led(GPIOC, 13), uart(USART1, 115200){};
 
   void run() {
     uart.print("SPI loopback test\r\n");

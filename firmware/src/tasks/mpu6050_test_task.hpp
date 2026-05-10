@@ -7,9 +7,9 @@
 #include "task.hpp"
 
 // MPU6050 registers
-constexpr uint8_t MPU_ADDR = 0x68;       // AD0 pin to GND
-constexpr uint8_t MPU_WHO_AM_I = 0x75;   // should return 0x68
-constexpr uint8_t MPU_PWR_MGMT_1 = 0x6B; // power management
+constexpr uint8_t MPU_ADDR = 0x68;        // AD0 pin to GND
+constexpr uint8_t MPU_WHO_AM_I = 0x75;    // should return 0x68
+constexpr uint8_t MPU_PWR_MGMT_1 = 0x6B;  // power management
 constexpr uint8_t MPU_ACCEL_XOUT_H = 0x3B;
 constexpr uint8_t MPU_TEMP_OUT_H = 0x41;
 constexpr uint8_t MPU_GYRO_XOUT_H = 0x43;
@@ -27,7 +27,7 @@ class Mpu6050TestTask : public Task<Mpu6050TestTask> {
   }
 
  public:
-  Mpu6050TestTask() : i2c(I2C1), led(GPIOC, 13), uart(USART1, 115200) {};
+  Mpu6050TestTask() : i2c(I2C1), led(GPIOC, 13), uart(USART1, 115200){};
 
   void run() {
     uart.print("MPU6050 test\r\n");

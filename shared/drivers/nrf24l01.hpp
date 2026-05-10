@@ -53,9 +53,7 @@ class Nrf24l01 {
     ceLow();
   }
 
-  void csDelay() {
-    for (volatile int i = 0; i < 10; i++);
-  }
+  void csDelay() { for (volatile int i = 0; i < 10; i++); }
 
   uint8_t readReg(uint8_t reg) {
     spi->csLow();
