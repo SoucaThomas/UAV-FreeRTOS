@@ -26,9 +26,8 @@ class DebugTask : public Task<DebugTask> {
         ServoMsg servo;
         if (bus.peek(servo)) {
           lastServoTs = servo.timestamp;
-          log.debug("P:%f R:%f | E:%d aL:%d aR:%d",
-                    sensor.pitch, sensor.roll,
-                    servo.elevator, servo.aileronL, servo.aileronR);
+          log.debug("P:%f R:%f | E:%d aL:%d aR:%d", sensor.pitch, sensor.roll, servo.elevator,
+                    servo.aileronL, servo.aileronR);
         } else {
           log.debug("P:%f R:%f", sensor.pitch, sensor.roll);
         }
