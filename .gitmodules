@@ -1,3 +1,6 @@
 [submodule "firmware/external/freertos"]
 	path = firmware/external/freertos
 	url = https://github.com/FreeRTOS/FreeRTOS-Kernel.git
+[submodule "ground-station/app"]
+	path = ground-station/app
+	url = git@github.com:SoucaThomas/UAV-GroundStation.git
