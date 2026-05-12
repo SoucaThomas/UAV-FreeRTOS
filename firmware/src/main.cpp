@@ -1,5 +1,6 @@
 #include "core/bus.hpp"
 #include "log.hpp"
+#include "tasks/control_task.hpp"
 #include "tasks/debug_task.hpp"
 #include "tasks/sensor_task.hpp"
 
@@ -11,10 +12,13 @@ int main() {
   bus.init();
 
   SensorTask sensorTask;
+  ControlTask controlTask;
+
   DebugTask debugTask;
 
-  sensorTask.start("sensor_test", 512, 2);
-  debugTask.start("debug_task", 512, 1);
+  sensorTask.start("sensor", 512, 3);
+  controlTask.start("control", 512, 2);
+  debugTask.start("debug", 512, 1);
 
   vTaskStartScheduler();
   while (true) {

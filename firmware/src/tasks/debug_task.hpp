@@ -16,13 +16,22 @@ class DebugTask : public Task<DebugTask> {
     log.info("Debug task started");
 
     uint32_t lastSensorTs = 0;
+    uint32_t lastServoTs = 0;
 
     while (true) {
       SensorMsg sensor;
-
       if (bus.peek(sensor) && sensor.timestamp != lastSensorTs) {
         lastSensorTs = sensor.timestamp;
-        log.debug("pitch=%f roll=%f", sensor.pitch, sensor.roll);
+
+        ServoMsg servo;
+        if (bus.peek(servo)) {
+          lastServoTs = servo.timestamp;
+          log.debug("P:%f R:%f | E:%d aL:%d aR:%d",
+                    sensor.pitch, sensor.roll,
+                    servo.elevator, servo.aileronL, servo.aileronR);
+        } else {
+          log.debug("P:%f R:%f", sensor.pitch, sensor.roll);
+        }
       }
 
       delay(100);
