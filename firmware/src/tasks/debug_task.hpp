@@ -10,7 +10,7 @@ class DebugTask : public Task<DebugTask> {
   Uart uart;
 
  public:
-  DebugTask() : uart(USART1, 115200) {};
+  DebugTask() : uart(USART1, 115200){};
 
   void run() {
     uart.print("Debug Task Started:\r\n");

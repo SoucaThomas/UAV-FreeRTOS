@@ -18,7 +18,7 @@ class SensorTask : public Task<SensorTask> {
   float roll;
 
  public:
-  SensorTask() : i2c(I2C1), mpu(&i2c), pitch(0.0f), roll(0.0f) {};
+  SensorTask() : i2c(I2C1), mpu(&i2c), pitch(0.0f), roll(0.0f){};
 
   void run() {
     mpu.setI2c(&i2c);
