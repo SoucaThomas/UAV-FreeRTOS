@@ -2,18 +2,18 @@
 #define DEBUG_TASK_HPP
 
 #include "core/bus.hpp"
-#include "drivers/uart.hpp"
+#include "log.hpp"
 #include "task.hpp"
 
 class DebugTask : public Task<DebugTask> {
  private:
-  Uart uart;
+  Logger log;
 
  public:
-  DebugTask() : uart(USART1, 115200){};
+  DebugTask() : log("Debug") {};
 
   void run() {
-    uart.print("Debug Task Started:\r\n");
+    log.info("Debug task started");
 
     uint32_t lastSensorTs = 0;
 
@@ -22,12 +22,7 @@ class DebugTask : public Task<DebugTask> {
 
       if (bus.peek(sensor) && sensor.timestamp != lastSensorTs) {
         lastSensorTs = sensor.timestamp;
-
-        uart.print("P:");
-        uart.printFloat(sensor.pitch, 2);
-        uart.print(" R:");
-        uart.printFloat(sensor.roll, 2);
-        uart.print("\r\n");
+        log.debug("pitch=%f roll=%f", sensor.pitch, sensor.roll);
       }
 
       delay(100);

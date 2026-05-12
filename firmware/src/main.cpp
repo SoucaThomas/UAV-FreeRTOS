@@ -1,8 +1,11 @@
 #include "core/bus.hpp"
+#include "log.hpp"
 #include "tasks/debug_task.hpp"
 #include "tasks/sensor_task.hpp"
 
 Bus bus;
+Uart Logger::uart(USART1, 115200);
+LogLevel Logger::minLevel = LogLevel::DEBUG;
 
 int main() {
   bus.init();
