@@ -1,8 +1,18 @@
-#include "tasks/pwm_test_task.hpp"
+#include "core/bus.hpp"
+#include "tasks/debug_task.hpp"
+#include "tasks/sensor_task.hpp"
+
+Bus bus;
 
 int main() {
-  PwmTestTask pwmTest;
-  pwmTest.start("pwm_test", 512, 1);
+  bus.init();
+
+  SensorTask sensorTask;
+  DebugTask debugTask;
+
+  sensorTask.start("sensor_test", 512, 2);
+  debugTask.start("debug_task", 512, 1);
+
   vTaskStartScheduler();
   while (true) {
   }

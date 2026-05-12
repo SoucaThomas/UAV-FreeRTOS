@@ -40,6 +40,7 @@ OBJS   += $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(RTOS_SRCS)))
 MCU     = -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
 INCLUDES = -I$(INC_DIR) \
+           -I$(SRC_DIR) \
            -I$(CMSIS_DIR) \
            -I$(RTOS_DIR)/include \
            -I$(RTOS_PORT) \
