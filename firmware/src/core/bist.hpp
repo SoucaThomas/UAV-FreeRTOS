@@ -55,8 +55,7 @@ inline BistResult runBist(Uart& uart) {
   result.heap = (freeHeap > 8192);
   uart.print(result.heap ? "[PASS] Heap\r\n" : "[FAIL] Heap\r\n");
 
-  uart.print(result.allPassed() ? "=== ALL TESTS PASSED ===\r\n"
-                                 : "=== TESTS FAILED ===\r\n");
+  uart.print(result.allPassed() ? "=== ALL TESTS PASSED ===\r\n" : "=== TESTS FAILED ===\r\n");
 
   return result;
 }
