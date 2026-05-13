@@ -18,7 +18,7 @@ class I2c {
     for (int i = 0; i < 16; i++) {
       GPIOB->BSRR = (1 << (6 + 16));  // SCL low
       for (volatile int d = 0; d < 100; d++);
-      GPIOB->BSRR = (1 << 6);         // SCL high
+      GPIOB->BSRR = (1 << 6);  // SCL high
       for (volatile int d = 0; d < 100; d++);
     }
   }
