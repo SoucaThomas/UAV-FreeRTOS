@@ -70,13 +70,13 @@ class LoggerTask : public Task<LoggerTask> {
 
     while (true) {
       // Auto-dump after 10 seconds of logging
-      if (logging && (xTaskGetTickCount() - logStartTime) > 10000) {
-        logging = false;
-        log.info("Logging stopped — %d entries", entryCount);
-        delay(1000);
-        dumpLog();
-        while (true) delay(1000);  // done, just idle
-      }
+      // if (logging && (xTaskGetTickCount() - logStartTime) > 10000) {
+      //   logging = false;
+      //   log.info("Logging stopped — %d entries", entryCount);
+      //   delay(1000);
+      //   dumpLog();
+      //   while (true) delay(1000);  // done, just idle
+      // }
 
       if (!logging) {
         delay(100);

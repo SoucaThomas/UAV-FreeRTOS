@@ -7,7 +7,7 @@
 - [ ] PID tuning (use serial charts to dial in gains)
 
 ### Developer experience
-- [ ] FreeRTOS runtime stats (CPU % per task)
+- [X] FreeRTOS runtime stats (CPU % per task)
 - [ ] Stack overflow detection (`configCHECK_FOR_STACK_OVERFLOW = 2`)
 - [ ] Heap usage monitoring
 - [ ] Loop timing (measure actual vs expected task duration)
