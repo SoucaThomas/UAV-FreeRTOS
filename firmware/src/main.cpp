@@ -1,3 +1,4 @@
+#include "core/bist.hpp"
 #include "core/bus.hpp"
 #include "log.hpp"
 #include "tasks/control_task.hpp"
@@ -13,6 +14,9 @@ SemaphoreHandle_t Logger::mutex = nullptr;
 int main() {
   bus.init();
   Logger::init();
+
+  // Pre-flight self test (runs before scheduler, uses UART directly)
+  runBist(Logger::getUart());
 
   SensorTask sensorTask;
   ControlTask controlTask;

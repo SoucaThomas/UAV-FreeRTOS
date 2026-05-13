@@ -50,6 +50,7 @@
 #define INCLUDE_uxTaskPriorityGet 0
 #define INCLUDE_vTaskDelete 0
 #define INCLUDE_vTaskSuspend 0
+#define INCLUDE_xTaskGetSchedulerState 1
 
 // Map FreeRTOS handlers to our vector table names
 #define vPortSVCHandler SVC_Handler

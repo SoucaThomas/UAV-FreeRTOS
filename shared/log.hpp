@@ -112,13 +112,14 @@ class Logger {
   template <typename... Args>
   void log(LogLevel level, const char* fmt, Args... args) {
     if (level < minLevel) return;
-    xSemaphoreTake(mutex, portMAX_DELAY);
+    bool useMutex = (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING);
+    if (useMutex) xSemaphoreTake(mutex, portMAX_DELAY);
     printTimestamp();
     printLevel(level);
     printTag();
     printFmt(fmt, args...);
     uart.print("\r\n");
-    xSemaphoreGive(mutex);
+    if (useMutex) xSemaphoreGive(mutex);
   }
 
  public:
@@ -126,6 +127,7 @@ class Logger {
 
   static void init() { mutex = xSemaphoreCreateMutex(); }
   static void setLevel(LogLevel level) { minLevel = level; }
+  static Uart& getUart() { return uart; }
 
   template <typename... Args>
   void debug(const char* fmt, Args... args) {

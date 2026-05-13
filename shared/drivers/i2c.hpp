@@ -61,31 +61,36 @@ class I2c {
     i2c->CR1 |= I2C_CR1_STOP;
   }
 
+  bool waitFlag(volatile uint32_t& reg, uint32_t flag, uint32_t timeout = 100000) {
+    while (timeout--) {
+      if (reg & flag) return true;
+    }
+    return false;
+  }
+
   uint8_t read(uint8_t addr, uint8_t reg) {
-    // --- First: write the register address ---
     // Generate START
     i2c->CR1 |= I2C_CR1_START;
-    while (!(i2c->SR1 & I2C_SR1_SB));
+    if (!waitFlag(i2c->SR1, I2C_SR1_SB)) return 0xFF;
 
     // Send slave address + write bit (0)
     i2c->DR = (addr << 1);
-    while (!(i2c->SR1 & I2C_SR1_ADDR));
+    if (!waitFlag(i2c->SR1, I2C_SR1_ADDR)) return 0xFF;
     (void)i2c->SR2;
 
     // Send register address
     i2c->DR = reg;
-    while (!(i2c->SR1 & I2C_SR1_TXE));
+    if (!waitFlag(i2c->SR1, I2C_SR1_TXE)) return 0xFF;
 
-    // --- Then: read the value ---
     // Generate repeated START
     i2c->CR1 |= I2C_CR1_START;
-    while (!(i2c->SR1 & I2C_SR1_SB));
+    if (!waitFlag(i2c->SR1, I2C_SR1_SB)) return 0xFF;
 
     // Send slave address + read bit (1)
     i2c->DR = (addr << 1) | 1;
-    while (!(i2c->SR1 & I2C_SR1_ADDR));
+    if (!waitFlag(i2c->SR1, I2C_SR1_ADDR)) return 0xFF;
 
-    // NACK after one byte (we only want 1 byte)
+    // NACK after one byte
     i2c->CR1 &= ~I2C_CR1_ACK;
     (void)i2c->SR2;
 
@@ -93,7 +98,7 @@ class I2c {
     i2c->CR1 |= I2C_CR1_STOP;
 
     // Wait for data
-    while (!(i2c->SR1 & I2C_SR1_RXNE));
+    if (!waitFlag(i2c->SR1, I2C_SR1_RXNE)) return 0xFF;
 
     return i2c->DR;
   }

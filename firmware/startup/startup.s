@@ -58,6 +58,14 @@ Reset_Handler:
     b .init_loop
 .init_done:
 
+    /* Enable FPU (CP10 and CP11 full access) */
+    ldr r0, =0xE000ED88
+    ldr r1, [r0]
+    orr r1, r1, #(0xF << 20)
+    str r1, [r0]
+    dsb
+    isb
+
     bl main
     b .
 
