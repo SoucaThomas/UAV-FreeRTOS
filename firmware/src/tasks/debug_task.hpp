@@ -10,7 +10,7 @@ class DebugTask : public Task<DebugTask> {
   Logger log;
 
  public:
-  DebugTask() : log("Debug") {};
+  DebugTask() : log("Debug"){};
 
   void run() {
     log.info("Debug task started");
