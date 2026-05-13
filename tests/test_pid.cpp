@@ -76,7 +76,7 @@ TEST(PID, DTermRespondsToChange) {
   PID pid(0.0f, 0.0f, 1.0f, -500.0f, 500.0f);
   float dt = 0.01f;
 
-  pid.compute(0.0f, 0.0f, dt);   // error=0, prevError=0
+  pid.compute(0.0f, 0.0f, dt);               // error=0, prevError=0
   float out = pid.compute(10.0f, 0.0f, dt);  // error=10, derivative = (10-0)/0.01 = 1000
 
   EXPECT_GT(out, 0.0f);  // should be positive (error increasing)
@@ -86,7 +86,7 @@ TEST(PID, DTermZeroWhenErrorConstant) {
   PID pid(0.0f, 0.0f, 1.0f, -500.0f, 500.0f);
   float dt = 0.01f;
 
-  pid.compute(10.0f, 0.0f, dt);  // first call sets prevError
+  pid.compute(10.0f, 0.0f, dt);              // first call sets prevError
   float out = pid.compute(10.0f, 0.0f, dt);  // same error, derivative = 0
 
   EXPECT_FLOAT_EQ(out, 0.0f);
@@ -136,8 +136,8 @@ TEST(PID, SetGainsChangesResponse) {
   pid.setGains(5.0f, 0.0f, 0.0f);
   float out2 = pid.compute(10.0f, 0.0f, 0.01f);
 
-  EXPECT_FLOAT_EQ(out1, 10.0f);   // kp=1 * error=10
-  EXPECT_FLOAT_EQ(out2, 50.0f);   // kp=5 * error=10
+  EXPECT_FLOAT_EQ(out1, 10.0f);  // kp=1 * error=10
+  EXPECT_FLOAT_EQ(out2, 50.0f);  // kp=5 * error=10
 }
 
 // --- Combined PID ---

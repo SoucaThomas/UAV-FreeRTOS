@@ -19,13 +19,9 @@ TEST(Clamp, ValueAboveMax) {
   EXPECT_FLOAT_EQ(clamp(2.0f, 0.0f, 1.0f), 1.0f);
 }
 
-TEST(Clamp, ValueAtMin) {
-  EXPECT_EQ(clamp(0, 0, 10), 0);
-}
+TEST(Clamp, ValueAtMin) { EXPECT_EQ(clamp(0, 0, 10), 0); }
 
-TEST(Clamp, ValueAtMax) {
-  EXPECT_EQ(clamp(10, 0, 10), 10);
-}
+TEST(Clamp, ValueAtMax) { EXPECT_EQ(clamp(10, 0, 10), 10); }
 
 // --- Edge cases ---
 
