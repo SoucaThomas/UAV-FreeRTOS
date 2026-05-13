@@ -1,7 +1,5 @@
 # TODO
 
-## Firmware — Next up
-
 ### Flight critical
 - [ ] Servo mixer + PWM output task (connect PID to actual servos)
 - [ ] ADC battery voltage monitoring (arming guard)
@@ -9,7 +7,6 @@
 - [ ] PID tuning (use serial charts to dial in gains)
 
 ### Developer experience
-- [ ] Command shell over UART (pid tuning, stats, reboot, log dump)
 - [ ] FreeRTOS runtime stats (CPU % per task)
 - [ ] Stack overflow detection (`configCHECK_FOR_STACK_OVERFLOW = 2`)
 - [ ] Heap usage monitoring
@@ -19,10 +16,9 @@
 - [ ] HardFault handler (print registers on crash)
 
 ### Data logging
-- [ ] W25Q64 flash driver (SPI, PA4 CS)
-- [ ] Flight logger task (subscribe to bus, write to flash)
-- [ ] Log dump command (read flash back over UART)
-- [ ] Circular RAM log buffer (last 500 lines, dump on crash)
+- [X] W25Q64 flash driver (SPI, PA4 CS)
+- [X] Flight logger task (subscribe to bus, write to flash)
+- [X] Log dump command (read flash back over UART)
 
 ### Testing & safety
 - [ ] Built-in self test (BIST) — check all peripherals on boot
