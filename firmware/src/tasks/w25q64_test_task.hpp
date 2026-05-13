@@ -14,7 +14,7 @@ class W25q64TestTask : public Task<W25q64TestTask> {
   Logger log;
 
  public:
-  W25q64TestTask() : spi(SPI1, GPIOA, 4), flash(&spi), log("W25q64 Test Task") {};
+  W25q64TestTask() : spi(SPI1, GPIOA, 4), flash(&spi), log("W25q64 Test Task"){};
 
   void run() {
     flash.setSpi(&spi);
