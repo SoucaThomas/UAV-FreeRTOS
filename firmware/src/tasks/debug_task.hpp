@@ -10,7 +10,7 @@ class DebugTask : public Task<DebugTask> {
   Logger log;
 
  public:
-  DebugTask() : log("Debug"){};
+  DebugTask() : log("Debug") {};
 
   void run() {
     log.info("Debug task started");
@@ -30,6 +30,22 @@ class DebugTask : public Task<DebugTask> {
                     servo.aileronL, servo.aileronR);
         } else {
           log.debug("P:%f R:%f", sensor.pitch, sensor.roll);
+        }
+
+        // Every 5s print task stats
+        if (xTaskGetTickCount() % 5000 < 100) {
+          TaskStatus_t tasks[10];
+          uint32_t totalRunTime;
+
+          UBaseType_t count = uxTaskGetSystemState(tasks, 10, &totalRunTime);
+
+          log.info("--- Task Stats ---");
+          for (UBaseType_t i = 0; i < count; i++) {
+            uint32_t percent =
+                (totalRunTime > 0) ? (tasks[i].ulRunTimeCounter * 100) / totalRunTime : 0;
+            log.info("%s: %d%%  stack:%d", tasks[i].pcTaskName, percent,
+                     tasks[i].usStackHighWaterMark);
+          }
         }
       }
 

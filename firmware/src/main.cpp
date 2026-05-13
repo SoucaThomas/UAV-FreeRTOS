@@ -30,6 +30,15 @@ int main() {
 }
 
 extern "C" {
+void vConfigureTimerForRunTimeStats(void) {
+  RCC->APB1ENR |= RCC_APB1ENR_TIM5EN;
+  TIM5->PSC = 1599;
+  TIM5->ARR = 0xFFFFFFFF;
+  TIM5->CR1 |= TIM_CR1_CEN;
+}
+
+uint32_t ulGetRunTimeCounterValue(void) { return TIM5->CNT; }
+
 void __cxa_pure_virtual() { while (1); }
 void vApplicationMallocFailedHook() { while (1); }
 

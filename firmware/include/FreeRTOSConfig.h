@@ -1,6 +1,8 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
+#include <stdio.h>
+
 // Cortex-M4 runs at 16MHz HSI by default (no PLL configured yet)
 #define configCPU_CLOCK_HZ 16000000UL
 #define configTICK_RATE_HZ 1000
@@ -29,8 +31,8 @@
 
 // Disable unused features to save flash
 #define configUSE_CO_ROUTINES 0
-#define configUSE_TRACE_FACILITY 0
-#define configGENERATE_RUN_TIME_STATS 0
+#define configUSE_TRACE_FACILITY 1
+#define configGENERATE_RUN_TIME_STATS 1
 #define configCHECK_FOR_STACK_OVERFLOW 0
 
 // Cortex-M4 interrupt priorities
@@ -53,5 +55,17 @@
 #define vPortSVCHandler SVC_Handler
 #define xPortPendSVHandler PendSV_Handler
 #define xPortSysTickHandler SysTick_Handler
+
+// Runtime stats timer — TIM5 running at 10kHz (100µs resolution)
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern void vConfigureTimerForRunTimeStats(void);
+extern uint32_t ulGetRunTimeCounterValue(void);
+#ifdef __cplusplus
+}
+#endif
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() vConfigureTimerForRunTimeStats()
+#define portGET_RUN_TIME_COUNTER_VALUE() ulGetRunTimeCounterValue()
 
 #endif
