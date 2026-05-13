@@ -3,6 +3,7 @@
 
 #include "FreeRTOS.h"
 #include "drivers/uart.hpp"
+#include "semphr.h"
 #include "task.h"
 
 namespace Color {
@@ -25,6 +26,7 @@ class Logger {
  private:
   static Uart uart;
   static LogLevel minLevel;
+  static SemaphoreHandle_t mutex;
   const char* tag;
 
   void printTimestamp() {
@@ -110,16 +112,19 @@ class Logger {
   template <typename... Args>
   void log(LogLevel level, const char* fmt, Args... args) {
     if (level < minLevel) return;
+    xSemaphoreTake(mutex, portMAX_DELAY);
     printTimestamp();
     printLevel(level);
     printTag();
     printFmt(fmt, args...);
     uart.print("\r\n");
+    xSemaphoreGive(mutex);
   }
 
  public:
   Logger(const char* tag) : tag(tag) {}
 
+  static void init() { mutex = xSemaphoreCreateMutex(); }
   static void setLevel(LogLevel level) { minLevel = level; }
 
   template <typename... Args>

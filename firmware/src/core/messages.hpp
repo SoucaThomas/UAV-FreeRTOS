@@ -49,4 +49,22 @@ struct StateMsg {
   uint32_t timestamp;
 };
 
+struct LogEntry {
+  uint32_t timestamp;
+  // Sensor
+  float pitch;
+  float roll;
+  float gyroX, gyroY, gyroZ;
+  float accelX, accelY, accelZ;
+  // Servos
+  uint16_t elevator;
+  uint16_t aileronL;
+  uint16_t aileronR;
+  uint16_t rudder;
+  uint16_t throttle;
+  // State
+  uint8_t state;
+  uint8_t padding;  // align to even size
+};
+
 #endif
