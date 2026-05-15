@@ -5,6 +5,12 @@ compile_commands.json
 tests/run_tests
 docs/*
 
+# Nix
+result
+
+# Direnv
+.direnv/
+
 # Ground station app
 ground-station/app/node_modules/
 ground-station/app/dist/

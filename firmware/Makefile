@@ -1,4 +1,15 @@
-TARGET  = blackpill
+# Firmware target: uav (default) or ground
+#   make all APP=uav
+#   make all APP=ground
+APP ?= uav
+
+ifeq ($(APP),uav)
+  TARGET = uav
+else ifeq ($(APP),ground)
+  TARGET = ground
+else
+  $(error Unknown APP=$(APP). Use APP=uav or APP=ground)
+endif
 
 # Toolchain
 CXX     = arm-none-eabi-g++
@@ -11,7 +22,7 @@ SRC_DIR     = src
 INC_DIR     = include
 STARTUP_DIR = startup
 LINKER_DIR  = linker
-BUILD_DIR   = build
+BUILD_DIR   = build/$(APP)
 
 # External libraries
 EXT_DIR     = external
@@ -20,10 +31,10 @@ RTOS_DIR    = $(EXT_DIR)/freertos
 RTOS_PORT   = $(RTOS_DIR)/portable/GCC/ARM_CM4F
 RTOS_HEAP   = $(RTOS_DIR)/portable/MemMang
 
-# Sources
-SRCS    = $(wildcard $(SRC_DIR)/*.cpp)
-STARTUP = $(STARTUP_DIR)/startup.s
-LINKER  = $(LINKER_DIR)/stm32f411ce.ld
+# Sources — app-specific main + any shared src/*.cpp files
+APP_SRCS = $(SRC_DIR)/$(APP)/main.cpp
+STARTUP  = $(STARTUP_DIR)/startup.s
+LINKER   = $(LINKER_DIR)/stm32f411ce.ld
 
 # FreeRTOS C sources
 RTOS_SRCS = $(RTOS_DIR)/tasks.c \
@@ -32,7 +43,7 @@ RTOS_SRCS = $(RTOS_DIR)/tasks.c \
             $(RTOS_PORT)/port.c \
             $(RTOS_HEAP)/heap_4.c
 
-OBJS    = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
+OBJS    = $(BUILD_DIR)/main.o
 OBJS   += $(BUILD_DIR)/startup.o
 OBJS   += $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(RTOS_SRCS)))
 
@@ -82,8 +93,11 @@ $(BUILD_DIR)/$(TARGET).elf: $(OBJS)
 
 $(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf
 	$(OBJCOPY) -O binary $< $@
+	$(OBJCOPY) -O ihex $< $(BUILD_DIR)/$(TARGET).hex
+	arm-none-eabi-objdump -d $< > $(BUILD_DIR)/$(TARGET).dis
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
+# App-specific main
+$(BUILD_DIR)/main.o: $(SRC_DIR)/$(APP)/main.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/startup.o: $(STARTUP) | $(BUILD_DIR)
@@ -116,6 +130,6 @@ flash-stlink: $(BUILD_DIR)/$(TARGET).elf
 		-c "program $< verify reset exit"
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf build
 
 .PHONY: all flash flash-stlink clean
