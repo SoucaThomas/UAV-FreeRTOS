@@ -41,7 +41,8 @@ class ControlTask : public Task<ControlTask> {
         float rollCorrection = rollPid.compute(targetRoll, sensor.roll, dt);
 
         ServoMsg servos = {
-            .elevator = (uint16_t)clamp(center + (int)pitchCorrection, (int)servoMin, (int)servoMax),
+            .elevator =
+                (uint16_t)clamp(center + (int)pitchCorrection, (int)servoMin, (int)servoMax),
             .aileronL = (uint16_t)clamp(center + (int)rollCorrection, (int)servoMin, (int)servoMax),
             .aileronR = (uint16_t)clamp(center - (int)rollCorrection, (int)servoMin, (int)servoMax),
             .rudder = center,      // no yaw yet
