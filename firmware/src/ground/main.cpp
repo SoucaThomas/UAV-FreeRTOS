@@ -1,4 +1,5 @@
 #include "core/bus.hpp"
+#include "ground/radio_tx_task.hpp"
 #include "log.hpp"
 
 Bus bus;
@@ -10,7 +11,8 @@ int main() {
   bus.init();
   Logger::init();
 
-  // TODO: create ground station tasks (radio TX, USB/UART bridge)
+  RadioTxTask radioTxTask;
+  radioTxTask.start("radioTx", 512, 2);
 
   vTaskStartScheduler();
   while (true) {

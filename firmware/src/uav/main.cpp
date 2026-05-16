@@ -4,6 +4,7 @@
 #include "tasks/control_task.hpp"
 #include "tasks/debug_task.hpp"
 #include "tasks/logger_task.hpp"
+#include "tasks/radio_rx_task.hpp"
 #include "tasks/sensor_task.hpp"
 
 Bus bus;
@@ -22,9 +23,11 @@ int main() {
   ControlTask controlTask;
   DebugTask debugTask;
   LoggerTask loggerTask;
+  RadioRxTask radioRxTask;
 
   sensorTask.start("sensor", 512, 3);
   controlTask.start("control", 512, 2);
+  radioRxTask.start("radioRx", 512, 2);
   debugTask.start("debug", 512, 1);
   loggerTask.start("logger", 512, 1);
 
