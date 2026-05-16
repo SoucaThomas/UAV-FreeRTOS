@@ -5,6 +5,7 @@
 #include "core/messages.hpp"
 #include "drivers/spi.hpp"
 #include "drivers/w25q64.hpp"
+#include "flash_map.hpp"
 #include "log.hpp"
 #include "stm32f411xe.h"
 #include "task.hpp"
@@ -30,7 +31,7 @@ class LoggerTask : public Task<LoggerTask> {
     // Skip to next page if entry would cross boundary
     alignToPage();
 
-    if (writeAddr + sizeof(LogEntry) >= 8 * 1024 * 1024) {
+    if (writeAddr + sizeof(LogEntry) >= FLASH_SIZE_END) {
       logging = false;
       log.warn("Flash full — %d entries logged", entryCount);
       return;
@@ -51,7 +52,7 @@ class LoggerTask : public Task<LoggerTask> {
       : spi(SPI1, GPIOA, 4),
         flash(&spi),
         log("Logger Task"),
-        writeAddr(0),
+        writeAddr(FLASH_BLACKBOX_ADDR),
         entryCount(0),
         logging(false) {}
 
@@ -60,9 +61,9 @@ class LoggerTask : public Task<LoggerTask> {
     uint32_t id = flash.readId();
     log.info("Flash ID: 0x%x%x%x", (uint8_t)(id >> 16), (uint8_t)(id >> 8), (uint8_t)id);
 
-    // Erase first sector to be ready
-    log.info("Erasing sector 0...");
-    flash.eraseSector(0);
+    // Erase first blackbox sector to be ready
+    log.info("Erasing blackbox sector...");
+    flash.eraseSector(FLASH_BLACKBOX_ADDR);
     log.info("Ready to log");
 
     logging = true;

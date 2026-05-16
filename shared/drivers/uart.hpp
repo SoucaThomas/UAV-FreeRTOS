@@ -47,8 +47,15 @@ class Uart {
 
   void printHex(uint8_t byte) {
     const char hex[] = "0123456789ABCDEF";
-    write(hex[byte >> 4]);    // high nibble
-    write(hex[byte & 0x0F]);  // low nibble
+    write(hex[byte >> 4]);
+    write(hex[byte & 0x0F]);
+  }
+
+  void printHex32(uint32_t val) {
+    printHex((val >> 24) & 0xFF);
+    printHex((val >> 16) & 0xFF);
+    printHex((val >> 8) & 0xFF);
+    printHex(val & 0xFF);
   }
 
   void printInt(int32_t val) {

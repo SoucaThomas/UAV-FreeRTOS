@@ -1,5 +1,8 @@
+#include "config_store.hpp"
 #include "core/bist.hpp"
 #include "core/bus.hpp"
+#include "core/fault_handler.hpp"
+#include "core/system.hpp"
 #include "log.hpp"
 #include "tasks/control_task.hpp"
 #include "tasks/debug_task.hpp"
@@ -16,14 +19,18 @@ int main() {
   bus.init();
   Logger::init();
 
-  // Pre-flight self test (runs before scheduler, uses UART directly)
+  initCrashLog();
+  crashLog->dump(Logger::getUart());
+
+  Config config = ConfigStore::load(*crashFlash);
+
   runBist(Logger::getUart());
 
   SensorTask sensorTask;
-  ControlTask controlTask;
+  ControlTask controlTask(config);
   DebugTask debugTask;
   LoggerTask loggerTask;
-  RadioRxTask radioRxTask;
+  RadioRxTask radioRxTask(config);
 
   sensorTask.start("sensor", 512, 3);
   controlTask.start("control", 512, 2);
@@ -34,31 +41,4 @@ int main() {
   vTaskStartScheduler();
   while (true) {
   }
-}
-
-extern "C" {
-void vConfigureTimerForRunTimeStats(void) {
-  RCC->APB1ENR |= RCC_APB1ENR_TIM5EN;
-  TIM5->PSC = 1599;
-  TIM5->ARR = 0xFFFFFFFF;
-  TIM5->CR1 |= TIM_CR1_CEN;
-}
-
-uint32_t ulGetRunTimeCounterValue(void) { return TIM5->CNT; }
-
-void __cxa_pure_virtual() { while (1); }
-void vApplicationMallocFailedHook() { while (1); }
-
-void* memset(void* dst, int val, unsigned int len) {
-  unsigned char* p = (unsigned char*)dst;
-  while (len--) *p++ = (unsigned char)val;
-  return dst;
-}
-
-void* memcpy(void* dst, const void* src, unsigned int len) {
-  unsigned char* d = (unsigned char*)dst;
-  const unsigned char* s = (const unsigned char*)src;
-  while (len--) *d++ = *s++;
-  return dst;
-}
 }
