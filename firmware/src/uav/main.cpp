@@ -19,12 +19,14 @@ int main() {
   bus.init();
   Logger::init();
 
+  printBootReason(Logger::getUart());
+
   initCrashLog();
   crashLog->dump(Logger::getUart());
 
   Config config = ConfigStore::load(*crashFlash);
 
-  runBist(Logger::getUart());
+  BistResult bist = runBist(Logger::getUart());
 
   SensorTask sensorTask;
   ControlTask controlTask(config);
@@ -32,11 +34,18 @@ int main() {
   LoggerTask loggerTask;
   RadioRxTask radioRxTask(config);
 
-  sensorTask.start("sensor", 512, 3);
-  controlTask.start("control", 512, 2);
+  // Only start sensor/control tasks if IMU is present
+  if (bist.imu) {
+    sensorTask.start("sensor", 512, 3);
+    controlTask.start("control", 512, 2);
+  }
+
   radioRxTask.start("radioRx", 512, 2);
   debugTask.start("debug", 512, 1);
   loggerTask.start("logger", 512, 1);
+
+  // Start watchdog last — 2s timeout, fed from idle hook
+  iwdgInit(2000);
 
   vTaskStartScheduler();
   while (true) {
